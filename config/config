@@ -1,0 +1,4 @@
+[core]
+    remote = cloud2
+['remote "cloud2"']
+    url = webdavs://cloud2.ott.rd.tp.pl/remote.php/dav/files/USERNAME/Big5/data

@@ -1,5 +1,6 @@
 """Script for creating the events summary."""
 import click
+from pathlib import Path
 
 from eventregistry import *
 
@@ -16,6 +17,12 @@ from events_mod.dataloader.eventregistry import newest_data
     "--max_items",
     help="Max articles downloaded from Event Registry.",
     type=int,
+)
+@click.option(
+    "--output_dir",
+    help="Directory to save data.",
+    type=click.Path(exists=True, path_type=Path),
+    default=Path("scripts/config/models.yaml")
 )
 def main(
     api_key: str,
