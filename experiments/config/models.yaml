@@ -3,7 +3,7 @@ default_training_params: &default_training_params
   verbose: False
 
 
-default_onehot_dberta_params: &default_onehot_dberta_params
+default_baseline_params: &default_baseline_params
   module: "events_mod.models.baseline"
   kwargs:
     experiment_name: 'experiment_name'
@@ -13,4 +13,4 @@ default_onehot_dberta_params: &default_onehot_dberta_params
 baseline_deberta:
   <<: *default_training_params
   model:
-    <<: *default_mlp_dberta_params
+    <<: *default_baseline_params
