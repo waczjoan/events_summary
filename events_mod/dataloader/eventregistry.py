@@ -25,6 +25,7 @@ def newest_data(
 
 def recently_added_data(
     topic: str,
+    max_items: int,
     eventregistry: EventRegistry
 ):
     """Print a list of recently added articles mentioning the topic"""
@@ -33,7 +34,9 @@ def recently_added_data(
     )
     arts = []
     for art in q.execQuery(
-            eventregistry, sortBy="date"
+            eventregistry,
+            sortBy="date",
+            maxItems=max_items
     ):
         arts.append(art)
     return arts

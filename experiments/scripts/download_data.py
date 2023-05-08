@@ -5,7 +5,9 @@ from pathlib import Path
 import configparser
 from eventregistry import *
 
-from events_mod.dataloader.eventregistry import newest_data, latest_events
+from events_mod.dataloader.eventregistry import (
+    newest_data, latest_events, recently_added_data
+)
 
 
 @click.command()
@@ -39,12 +41,19 @@ from events_mod.dataloader.eventregistry import newest_data, latest_events
     type=str,
     default="title"
 )
+@click.option(
+    "--api_type",
+    help="Type to api endpoint",
+    type=str,
+    default="recently_added"
+)
 def main(
     keywords: str,
     keywords_loc: str,
     max_items: int,
     config_path: Path,
-    output_dir: Path
+    output_dir: Path,
+    api_type: str
 ):
     config = configparser.RawConfigParser()
     config.read(config_path)
@@ -52,20 +61,30 @@ def main(
     details_dict = dict(config.items('eventRegistry'))
 
     er = EventRegistry(apiKey=details_dict['apikey'])
-    #arts = newest_data(
-    #    eventregistry=er,
-    #    max_items=max_items,
-    #    keywords=keywords,
-    #    keywords_loc=keywords_loc
-    #)
 
-    arts = latest_events(
-        topic=keywords,
-        eventregistry=er,
-        n_items=max_items,
-    )
+    if api_type == "newest_data":
+        arts = newest_data(
+            eventregistry=er,
+            max_items=max_items,
+            keywords=keywords,
+            keywords_loc=keywords_loc
+        )
+    elif api_type == "latest_events":
+        arts = latest_events(
+            topic=keywords,
+            eventregistry=er,
+            n_items=max_items,
+        )
+    elif api_type == "recently_added":
+        arts = recently_added_data(
+            eventregistry=er,
+            topic=keywords,
+            max_items=max_items
+        )
     output_file = Path(os.path.join(
-        output_dir, Path(f"{keywords}"),
+        output_dir,
+        Path(api_type),
+        Path(keywords),
         Path(f"{keywords_loc}.json")
     ))
     output_file.parent.mkdir(parents=True, exist_ok=True)
