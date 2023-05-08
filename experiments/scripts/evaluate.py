@@ -1,5 +1,10 @@
 """Script for creating the events summary."""
+from typing import Dict
 import click
+from pathlib import Path
+
+import yaml
+
 
 @click.command()
 @click.option(
