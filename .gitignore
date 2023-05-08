@@ -131,4 +131,4 @@ dmypy.json
 # PyCharm
 .idea/
 
-*config.local
+config/config.local
