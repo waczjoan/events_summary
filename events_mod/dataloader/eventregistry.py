@@ -3,19 +3,24 @@ from eventregistry import *
 
 def newest_data(
     max_items: int,
-    eventregistry: EventRegistry
+    eventregistry: EventRegistry,
+    keywords_loc: str,
+    keywords: str
 ):
     """Find news articles that mention Tesla in the article title"""
     q = QueryArticlesIter(
-        keywords="tesla",
-        keywordsLoc="title"
+        keywords=keywords,
+        keywordsLoc=keywords_loc
     )
-    for art in q.execQuery(
+    exec_query = q.execQuery(
         eventregistry,
         sortBy="date",
         maxItems=max_items
-    ):
-        print(art)
+    )
+    arts = []
+    for art in exec_query:
+        arts.append(art)
+    return arts
 
 
 def recently_added_data(
@@ -26,10 +31,12 @@ def recently_added_data(
     q = QueryArticlesIter(
         conceptUri=eventregistry.getConceptUri(topic)
     )
+    arts = []
     for art in q.execQuery(
-            eventregistry, sortBy = "date"
+            eventregistry, sortBy="date"
     ):
-        print(art)
+        arts.append(art)
+    return arts
 
 
 def latest_events(
@@ -47,4 +54,4 @@ def latest_events(
             count=n_items
         )
     )
-    print(eventregistry.execQuery(q))
+    return eventregistry.execQuery(q)

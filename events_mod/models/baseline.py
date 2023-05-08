@@ -1,6 +1,7 @@
 """Baseline"""
 
-class Baseline():
+
+class Baseline:
     def __init__(
         self,
         experiment_name,
