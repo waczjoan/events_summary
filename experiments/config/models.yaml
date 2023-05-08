@@ -1,0 +1,16 @@
+default_training_params: &default_training_params
+  max_epochs: 40
+  verbose: False
+
+
+default_onehot_dberta_params: &default_onehot_dberta_params
+  module: "events_mod.models.baseline"
+  kwargs:
+    experiment_name: 'experiment_name'
+    model_name: 'model_name'
+    device: 'cuda'
+
+baseline_deberta:
+  <<: *default_training_params
+  model:
+    <<: *default_mlp_dberta_params
