@@ -89,7 +89,7 @@ def main(
     ))
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("w") as f_out:
-        json.dump(obj=arts, fp=f_out, indent=4)
+        json.dump(obj=arts, fp=f_out, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":

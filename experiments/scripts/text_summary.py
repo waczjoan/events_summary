@@ -8,6 +8,7 @@ import json
 import yaml
 
 from events_mod.utils import load_model_from_config
+from events_mod.dataloader.summary import load_texts
 
 
 @click.command()
@@ -21,7 +22,7 @@ from events_mod.utils import load_model_from_config
     "--model",
     help="Name of selected base model",
     type=str,
-    default="one_line_summary"
+    default="summarizer_for_news"
 )
 @click.option(
     "--output_dir",
@@ -37,29 +38,23 @@ def main(
     with open(hparams_path, "r") as fin:
         hparams = yaml.safe_load(fin)[model]
 
-    abstract = """After a tense and closely watched election season, the results of the 2020 US Presidential Election have been announced. Democratic candidate Joe Biden has been declared the winner, defeating incumbent President Donald Trump. Biden secured the presidency after a hard-fought campaign that saw record voter turnout and widespread controversy over issues such as mail-in ballots, voter fraud, and election interference. 
-    Despite Trump's claims of voter fraud and legal challenges in several key swing states,
-    Biden was able to secure enough electoral votes to win the election. Biden's win was 
-    supported by a diverse coalition of voters, including people of color, women,
-    and young people, who turned out in record numbers to support the Democratic ticket. 
-    Biden's running mate, Kamala Harris, also made history as the first woman and first 
-    person of color to be elected Vice President of the United States
-    """
-
-    id_key = "1"
     model = load_model_from_config(cfg=hparams["model"])
-    input_ids = model.tokenize(abstract)
-    generated_ids = model.generate(input_ids)
-    decoded_output = model.decode(generated_ids)
+    data_to_summary = load_texts(hparams["data_text"])
 
-    output_file = Path(os.path.join(
-        output_dir, Path(model.experiment_name),
-        Path(model.model_name),
-        Path(f"{id_key}.json")
-    ))
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    with output_file.open("w") as f_out:
-        json.dump(obj=decoded_output, fp=f_out, indent=4)
+    for id_key in data_to_summary:
+        text = data_to_summary[id_key]
+        input_ids = model.tokenize(text)
+        generated_ids = model.generate(input_ids)
+        decoded_output = model.decode(generated_ids)
+
+        output_file = Path(os.path.join(
+            output_dir, Path(model.experiment_name),
+            Path(model.model_name),
+            Path(f"{id_key}.json")
+        ))
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with output_file.open("w") as f_out:
+            json.dump(obj=decoded_output, fp=f_out, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":

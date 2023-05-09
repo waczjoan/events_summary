@@ -1,6 +1,6 @@
 data_text_params: &data_text_params
   kwargs:
-    path_to_data: "data/example.json"
+    path_to_data: "data/input/example.json"
 
 one_line_summary_params: &one_line_summary_params
   module: "events_mod.models.Seq2Seq"
@@ -12,20 +12,19 @@ key_phrase_transformer_params: &key_phrase_transformer_params
   module: "events_mod.models.Seq2Seq"
   kwargs:
     experiment_name: 'key_phrase'
-    model_name: 'snrspeaks/KeyPhraseTransformer',
+    model_name: 'snrspeaks/KeyPhraseTransformer'
 
 summarizer_for_news_params: &summarizer_for_news_params
   module: "events_mod.models.Seq2Seq"
   kwargs:
     experiment_name: 'summary'
-    model_name: 'anikethdev/t5-summarizer-for-news',
+    model_name: 'anikethdev/t5-summarizer-for-news'
 
 one_line_summary:
   model:
       <<: *one_line_summary_params
   data_text:
       <<: *data_text_params
-
 
 summarizer_for_news:
   model:
