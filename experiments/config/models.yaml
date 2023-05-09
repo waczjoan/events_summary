@@ -1,16 +1,39 @@
-default_training_params: &default_training_params
-  max_epochs: 40
-  verbose: False
-
-
-default_baseline_params: &default_baseline_params
-  module: "events_mod.models.baseline"
+data_text_params: &data_text_params
   kwargs:
-    experiment_name: 'experiment_name'
-    model_name: 'model_name'
-    device: 'cuda'
+    path_to_data: "data/input/example.json"
 
-baseline_deberta:
-  <<: *default_training_params
+one_line_summary_params: &one_line_summary_params
+  module: "events_mod.models.Seq2Seq"
+  kwargs:
+    experiment_name: 'summary'
+    model_name: 'snrspeaks/t5-one-line-summary'
+
+key_phrase_transformer_params: &key_phrase_transformer_params
+  module: "events_mod.models.Seq2Seq"
+  kwargs:
+    experiment_name: 'key_phrase'
+    model_name: 'snrspeaks/KeyPhraseTransformer'
+
+summarizer_for_news_params: &summarizer_for_news_params
+  module: "events_mod.models.Seq2Seq"
+  kwargs:
+    experiment_name: 'summary'
+    model_name: 'anikethdev/t5-summarizer-for-news'
+
+one_line_summary:
   model:
-    <<: *default_baseline_params
+      <<: *one_line_summary_params
+  data_text:
+      <<: *data_text_params
+
+summarizer_for_news:
+  model:
+      <<: *summarizer_for_news_params
+  data_text:
+    <<: *data_text_params
+
+key_phrase_summary:
+  model:
+      <<: *key_phrase_transformer_params
+  data_text:
+    <<: *data_text_params

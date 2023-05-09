@@ -4,6 +4,6 @@ setup(
     name="aggregation_mod",
     version="0.0.1",
     description="Models to create events summary.",
-    author="kithogue, waczyjoan",
+    author="kithogue, michalilski, waczyjoan",
     packages=find_packages(),
 )

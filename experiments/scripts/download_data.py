@@ -1,9 +1,11 @@
 """Script for creating the events summary."""
 import click
+import json
+import os
 from pathlib import Path
 
 import configparser
-from eventregistry import *
+from eventregistry import EventRegistry
 
 from events_mod.dataloader.eventregistry import (
     newest_data, latest_events, recently_added_data
@@ -55,11 +57,11 @@ def main(
     output_dir: Path,
     api_type: str
 ):
+    """Download data from Event Registry."""
     config = configparser.RawConfigParser()
     config.read(config_path)
 
     details_dict = dict(config.items('eventRegistry'))
-
     er = EventRegistry(apiKey=details_dict['apikey'])
 
     if api_type == "newest_data":
@@ -89,7 +91,7 @@ def main(
     ))
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("w") as f_out:
-        json.dump(obj=arts, fp=f_out, indent=4)
+        json.dump(obj=arts, fp=f_out, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":
