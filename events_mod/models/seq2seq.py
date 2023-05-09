@@ -1,4 +1,7 @@
 """AutoModelForSeq2SeqLM"""
+import collections as c
+import operator
+
 import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
@@ -46,4 +49,14 @@ class Seq2Seq:
             clean_up_tokenization_spaces=True
         ) for g in generated_ids]
 
+        if self.experiment_name == 'key_phrase':
+            key_words_list = ' '.join(preds).split(" | ")
+            d = dict(c.Counter(key_words_list))
+            preds = dict(
+                sorted(
+                    d.items(),
+                    key=operator.itemgetter(1),
+                    reverse=True
+                )
+            )
         return preds
