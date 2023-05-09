@@ -1,5 +1,5 @@
-from .baseline import Baseline
+from .seq2seq import Seq2Seq
 
 __all__ = [
-    "Baseline",
+    "Seq2Seq",
 ]
