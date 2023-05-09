@@ -1,4 +1,7 @@
-from eventregistry import *
+"""Methods that allow to obtain articles or events from Event Registry."""
+from eventregistry import (
+    EventRegistry, QueryArticlesIter, QueryEvents, RequestEventsInfo
+)
 
 
 def newest_data(
@@ -7,7 +10,7 @@ def newest_data(
     keywords_loc: str,
     keywords: str
 ):
-    """Find news articles that mention Tesla in the article title"""
+    """Find news articles that mention Tesla in the article title."""
     q = QueryArticlesIter(
         keywords=keywords,
         keywordsLoc=keywords_loc
@@ -28,7 +31,7 @@ def recently_added_data(
     max_items: int,
     eventregistry: EventRegistry
 ):
-    """Print a list of recently added articles mentioning the topic"""
+    """Print a list of recently added articles mentioning the topic."""
     q = QueryArticlesIter(
         conceptUri=eventregistry.getConceptUri(topic)
     )
@@ -47,7 +50,7 @@ def latest_events(
     eventregistry: EventRegistry,
     n_items: int,
 ):
-    """Search for latest events related to the topic"""
+    """Search for latest events related to the topic."""
     q = QueryEvents(
         conceptUri=eventregistry.getConceptUri(topic)
     )

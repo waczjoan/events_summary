@@ -1,4 +1,4 @@
-"""AutoModelForSeq2SeqLM"""
+"""AutoModelForSeq2SeqLM from Hugging face, easy uses."""
 import collections as c
 import operator
 
@@ -7,6 +7,8 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
 class Seq2Seq:
+    """Model to change sequence to sequence."""
+
     def __init__(
             self,
             experiment_name,
@@ -20,9 +22,10 @@ class Seq2Seq:
         )
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    def tokenize(self, abstract) -> torch.Tensor:
+    def tokenize(self, text) -> torch.Tensor:
+        """Tokenize text."""
         return self.tokenizer.encode(
-            "summarize: " + abstract,
+            "summarize: " + text,
             return_tensors="pt",
             add_special_tokens=True
         )
@@ -32,6 +35,7 @@ class Seq2Seq:
         input_ids: torch.Tensor,
         num_return_sequences: int = 3
     ):
+        """Generate text (tokens)."""
         return self.model.generate(
             input_ids=input_ids,
             num_beams=10,
@@ -43,6 +47,12 @@ class Seq2Seq:
         )
 
     def decode(self, generated_ids):
+        """Decode generated tokens to text.
+
+        If model generate keyword make sure that input includes
+        one keyword only one.
+
+        """
         preds = [self.tokenizer.decode(
             g,
             skip_special_tokens=True,
