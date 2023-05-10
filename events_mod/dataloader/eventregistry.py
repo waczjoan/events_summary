@@ -67,24 +67,6 @@ def latest_events(
     return eventregistry.execQuery(q)
 
 
-def latest_events(
-    topic: str,
-    eventregistry: EventRegistry,
-    n_items: int,
-):
-    """Search for latest events related to the topic."""
-    q = QueryEvents(
-        conceptUri=eventregistry.getConceptUri(topic)
-    )
-    q.setRequestedResult(
-        RequestEventsInfo(
-            sortBy="date",
-            count=n_items
-        )
-    )
-    return eventregistry.execQuery(q)
-
-
 def detailed_about_event(
     eventregistry: EventRegistry,
     lang: str,

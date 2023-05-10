@@ -68,6 +68,7 @@ def create_summary(model, text):
 
 @st.cache_resource
 def load_model(model_type, hparams):
+    """Load model and cache."""
     model = load_model_from_config(
         cfg=hparams[model_type]["model"]
     )
