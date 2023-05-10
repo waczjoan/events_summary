@@ -7,6 +7,7 @@ from pathlib import Path
 from annotated_text import annotated_text
 import click
 import streamlit as st
+from events_mod.utils import truncate_texts
 import yaml
 
 from events_mod.evaluate.metrics import calc_rouge
@@ -133,7 +134,10 @@ def main(
 
     col1, col2, col3 = st.columns(3)
 
-    text_concat = text1
+    text_concat = truncate_texts(
+        texts_batch=[text1, text2, text3, text4]
+    )
+    st.write(text_concat)
 
     with col1:
         checkbox1 = st.checkbox("Summary:")
