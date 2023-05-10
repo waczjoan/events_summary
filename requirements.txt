@@ -1,3 +1,5 @@
+streamlit==1.22.0
+st-annotated-text==4.0.0
 accelerate==0.19.0
 bitsandbytes-cuda111==0.26.0.post2
 configparser==5.3.0

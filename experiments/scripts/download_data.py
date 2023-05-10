@@ -8,7 +8,10 @@ import configparser
 from eventregistry import EventRegistry
 
 from events_mod.dataloader.eventregistry import (
-    newest_data, latest_events, recently_added_data
+    detailed_about_event,
+    newest_data,
+    latest_events,
+    recently_added_data,
 )
 
 
@@ -35,7 +38,7 @@ from events_mod.dataloader.eventregistry import (
     "--keywords",
     help="Key words using to search articles",
     type=str,
-    default="tesla"
+    default="computer science"
 )
 @click.option(
     "--keywords_loc",
@@ -47,7 +50,19 @@ from events_mod.dataloader.eventregistry import (
     "--api_type",
     help="Type to api endpoint",
     type=str,
-    default="recently_added"
+    default="detailed_about_event"
+)
+@click.option(
+    "--event_id",
+    help="Event's id.",
+    type=str,
+    default="eng-8608850"
+)
+@click.option(
+    "--lang",
+    help="Events language",
+    type=str,
+    default="eng"
 )
 def main(
     keywords: str,
@@ -55,7 +70,9 @@ def main(
     max_items: int,
     config_path: Path,
     output_dir: Path,
-    api_type: str
+    api_type: str,
+    event_id: str,
+    lang: str
 ):
     """Download data from Event Registry."""
     config = configparser.RawConfigParser()
@@ -83,6 +100,14 @@ def main(
             topic=keywords,
             max_items=max_items
         )
+    elif api_type == "detailed_about_event":
+        arts = detailed_about_event(
+            eventregistry=er,
+            event_id=event_id,
+            max_items=max_items,
+            lang=lang
+        )
+        keywords = event_id
     output_file = Path(os.path.join(
         output_dir,
         Path(api_type),
@@ -91,7 +116,7 @@ def main(
     ))
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with output_file.open("w") as f_out:
-        json.dump(obj=arts, fp=f_out, indent=4, ensure_ascii=False)
+        json.dump(obj=arts, fp=f_out, indent=4, ensure_ascii=True)
 
 
 if __name__ == "__main__":
