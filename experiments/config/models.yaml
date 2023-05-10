@@ -37,3 +37,10 @@ key_phrase_summary:
       <<: *key_phrase_transformer_params
   data_text:
     <<: *data_text_params
+
+bullet_point_summary:
+  model:
+    <<: *one_line_summary_params
+  data_text:
+    <<: *data_text_params
+  split_strategy: empty_line
