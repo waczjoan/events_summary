@@ -19,9 +19,12 @@ def load_model_from_config(cfg: dict):
 
 
 def truncate_texts(texts_batch: List[str], add_eos_token: bool = True) -> str:
-    """Truncates text to max length of the model with or without a sep token (set the add EOS token parameter to True)
-    Receiving a batch of 4 texts, truncates the length of the input to 512 subword tokens as encoded by T5 tokenizer
-    Returns a concatenated string with or without separators
+    """Truncates text to max length of the model.
+
+    Set the add EOS token parameter to True to add separator between texts.
+    Receives a batch of 4 texts,
+    truncates the length of the input to 512 tokens as encoded by T5.
+    Returns a concatenated string with or without separators.
     """
     tokenizer = AutoTokenizer.from_pretrained('t5-base')
     result = []
