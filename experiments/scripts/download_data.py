@@ -35,7 +35,7 @@ from events_mod.dataloader.eventregistry import (
     "--keywords",
     help="Key words using to search articles",
     type=str,
-    default="tesla"
+    default="ai"
 )
 @click.option(
     "--keywords_loc",

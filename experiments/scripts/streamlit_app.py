@@ -41,6 +41,38 @@ def calc_rouge_metrics(
     annotated_text(body)
 
 
+def create_bullet_points(model_bullet_point_summary, text):
+    """Create bullets point to selected text."""
+    input_ids = model_bullet_point_summary.tokenize(text)
+    generated_ids = model_bullet_point_summary.generate(
+        input_ids)
+    decoded_output = model_bullet_point_summary.decode(
+        generated_ids
+    )
+    return decoded_output
+
+
+def create_summary(model, text):
+    """Create one line summary."""
+    input_ids = model.tokenize(text)
+    generated_ids = model.generate(
+        input_ids,
+        num_return_sequences=1
+    )
+    decoded_output = model.decode(
+        generated_ids
+    )
+    return decoded_output
+
+
+@st.cache_resource
+def load_model(model_type, hparams):
+    model = load_model_from_config(
+        cfg=hparams[model_type]["model"]
+    )
+    return model
+
+
 @click.command()
 @click.option(
     "--hparams_path",
@@ -57,15 +89,14 @@ def main(
     with open(hparams_path, "r") as fin:
         hparams = yaml.safe_load(fin)
 
-    model = load_model_from_config(
-        cfg=hparams['summarizer_for_news']["model"]
-    )
-    model_one_line_summary = load_model_from_config(
-        cfg=hparams['one_line_summary']["model"]
-    )
-    model_key_phrase_summary = load_model_from_config(
-        cfg=hparams['key_phrase_summary']["model"]
-    )
+    model = load_model('summarizer_for_news', hparams)
+
+    model_one_line_summary = load_model('one_line_summary', hparams)
+
+    model_bullet_point_summary = load_model('bullet_point_summary', hparams)
+
+    model_key_phrase_summary = load_model('key_phrase_summary', hparams)
+
     st.header('Texts')
 
     col1, col2, col3, col4 = st.columns(4)
@@ -74,66 +105,60 @@ def main(
         text1 = st.text_area('First text', '... input 1st text')
         st.write('1st text len:', len(text1))
         if st.checkbox("Summary 1:"):
-            st.write('bullet_point_summary 2 #TODO')
+            out = create_bullet_points(model_bullet_point_summary, text1)
+            st.write(out.split('\n - '))
 
     with col2:
         text2 = st.text_area('2nd text', '... input 2nd text')
         st.write('2nd text len:', len(text2))
         if st.checkbox("Summary 2:"):
-            st.write('bullet_point_summary 2 #TODO')
+            out = create_bullet_points(model_bullet_point_summary, text2)
+            st.write(out.split('\n - '))
 
     with col3:
         text3 = st.text_area('3rd text', '... input 3rd text')
         st.write('3rd text len:', len(text3))
         if st.checkbox("Summary 3:"):
-            st.write('bullet_point_summary 3 #TODO')
+            out = create_bullet_points(model_bullet_point_summary, text3)
+            st.write(out.split('\n - '))
 
     with col4:
         text4 = st.text_area('4th text', '... input 4th text')
         st.write('4th text len:', len(text4))
         if st.checkbox("Summary 4:"):
-            st.write('bullet_point_summary 4 #TODO')
+            out = create_bullet_points(model_bullet_point_summary, text4)
+            st.write(out.split('\n - '))
 
     st.header('All texts summarization')
 
     col1, col2, col3 = st.columns(3)
 
+    text_concat = text1
+
     with col1:
         checkbox1 = st.checkbox("Summary:")
         if checkbox1:
-
-            text = text1
-            input_ids = model.tokenize(text)
-            generated_ids = model.generate(
-                input_ids,
-                num_return_sequences=1
+            decoded_output = create_summary(
+                model, text_concat
             )
-            decoded_output = model.decode(generated_ids)
             decoded_output1 = str(decoded_output)
 
             st.write(decoded_output1)
 
     with col2:
         if st.checkbox("Model one line summary:"):
-
-            text = text1
-            input_ids = model_one_line_summary.tokenize(text)
-            generated_ids = model_one_line_summary.generate(
-                input_ids,
-                num_return_sequences=1
+            decoded_output = create_summary(
+                model_one_line_summary, text_concat
             )
-            decoded_output2 = model_one_line_summary.decode(
-                generated_ids
-            )
+            decoded_output2 = str(decoded_output)
             st.write(decoded_output2)
 
     with col3:
         if st.checkbox("Key phrase:"):
-
-            text = text1
-            input_ids = model_key_phrase_summary.tokenize(text)
-            generated_ids = model_key_phrase_summary.generate(input_ids)
-            decoded_output3 = model_key_phrase_summary.decode(generated_ids)
+            decoded_output = create_summary(
+                model_key_phrase_summary, text_concat
+            )
+            decoded_output3 = str(decoded_output)
             st.write(decoded_output3)
 
     if checkbox1:
