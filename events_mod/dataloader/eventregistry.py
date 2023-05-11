@@ -1,6 +1,10 @@
 """Methods that allow to obtain articles or events from Event Registry."""
 from eventregistry import (
-    EventRegistry, QueryArticlesIter, QueryEvents, RequestEventsInfo
+    EventRegistry,
+    QueryArticlesIter,
+    QueryEvents,
+    RequestEventsInfo,
+    QueryEventArticlesIter
 )
 
 
@@ -61,3 +65,24 @@ def latest_events(
         )
     )
     return eventregistry.execQuery(q)
+
+
+def detailed_about_event(
+    eventregistry: EventRegistry,
+    lang: str,
+    event_id: str,
+    max_items: int
+):
+    """Find detailed information about a specific event."""
+    arts = []
+    iter = QueryEventArticlesIter(
+        event_id, lang=lang
+    )
+    q = iter.execQuery(
+        eventregistry,
+        sortBy="sourceImportance",
+        maxItems=max_items
+    )
+    for art in q:
+        arts.append(art)
+    return arts
