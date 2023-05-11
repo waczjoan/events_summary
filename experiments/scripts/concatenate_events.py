@@ -12,7 +12,7 @@ import json
     "--input_dir",
     help="Input data directory",
     type=click.Path(exists=True, path_type=Path),
-    default=Path("output")
+    default=Path("data/input")
 )
 @click.option(
     "--output_dir",
@@ -34,21 +34,19 @@ def main(
     """Process and write data concatenated by keyword."""
     result = {}
     for directory in os.listdir(input_dir):
-        for subdirectory in os.listdir(os.path.join(input_dir, directory)):
+        if os.path.isdir(os.path.join(input_dir,
+                                      directory)):
             for filename in os.listdir(os.path.join(input_dir,
-                                                    directory,
-                                                    subdirectory)):
+                                                    directory)):
                 with open(os.path.join(input_dir,
                                        directory,
-                                       subdirectory,
                                        filename), 'r') as f_in:
-                    texts = []
                     data = json.load(f_in)
-                    for data_dict in data:
-                        texts.append(data_dict['body'])
-                    result[subdirectory] = truncate_texts(texts_batch=texts,
-                                                          add_eos_token=add_eos)
-    filename = 'example_concat.json'
+                    for k, v in data.items():
+                        result[k] = truncate_texts(texts_batch=v,
+                                                   add_eos_token=add_eos)
+
+    filename = 'concat.json'
     if add_eos:
         filename = '_'.join(['sep', filename])
     with open(os.path.join(output_dir, filename), 'w') as f_out:
