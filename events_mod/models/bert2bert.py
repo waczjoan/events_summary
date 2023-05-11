@@ -1,7 +1,6 @@
 """Pretrained Bert2Bert model for text summarization."""
 
 from transformers import EncoderDecoderModel, AutoTokenizer
-from typing import Union, List
 
 MODEL_PATH = 'patrickvonplaten/bert2bert_cnn_daily_mail'
 
@@ -12,25 +11,32 @@ class Bert2Bert:
     def __init__(
             self,
             experiment_name: str,
-            device: str = 'cuda'):
+            model_name: str,
+            device: str = 'cuda', ):
         """Specify the experiment name and device as per config."""
         self.experiment_name = experiment_name
         self.model = EncoderDecoderModel.from_pretrained(MODEL_PATH)
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH)
         self.device = device
+        self.model_name = model_name
 
-    def predict(self, inputs: Union[str, List[str]]):
-        """Method taking a text or list of texts and returning summary(-ies)."""
-        tokenized_inputs = self.tokenizer(
+    def tokenize(self, inputs):
+        """Tokenize model inputs."""
+        return self.tokenizer(
             inputs,
             padding="max_length",
             truncation=True,
             max_length=512,
             return_tensors="pt"
         )
-        input_ids = tokenized_inputs.input_ids.to(self.device)
-        attention_mask = tokenized_inputs.attention_mask.to(self.device)
-        self.model.to(self.device)
-        outputs = self.model.generate(input_ids, attention_mask=attention_mask)
 
+    def generate(self, inputs_ids):
+        """Method taking tokenized inputs and returning tensor predictions."""
+        input_ids = inputs_ids['input_ids'].to(self.device)
+        attention_mask = inputs_ids.attention_mask.to(self.device)
+        self.model.to(self.device)
+        return self.model.generate(input_ids, attention_mask=attention_mask)
+
+    def decode(self, outputs):
+        """Method decoding tensor predictions into string output."""
         return self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
