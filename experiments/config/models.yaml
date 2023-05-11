@@ -20,12 +20,19 @@ summarizer_for_news_params: &summarizer_for_news_params
     experiment_name: 'summary'
     model_name: 'anikethdev/t5-summarizer-for-news'
 
+bert_summarizer_for_news_params: &bert_summarizer_for_news_params
+  module: "events_mod.models.Bert2Bert"
+  kwargs:
+    experiment_name: 'summary'
+    device: 'cuda'
+    model_name: 'bert2bert_cnn_daily_mail'
+
 bullet_point_summary_params: &bullet_point_summary_params
   module: "events_mod.models.BulletPointSeq2Seq"
   kwargs:
     experiment_name: 'bullet_point_summary'
     model_name: 'snrspeaks/t5-one-line-summary'
-    split_strategy: empty_line
+    split_strategy: 'empty_line'
 
 one_line_summary:
   model:
@@ -44,6 +51,12 @@ key_phrase_summary:
       <<: *key_phrase_transformer_params
   data_text:
     <<: *data_text_params
+
+bert_summarizer_for_news:
+    model:
+      <<: *bert_summarizer_for_news_params
+    data_text:
+      <<: *data_text_params
 
 bullet_point_summary:
   model:
