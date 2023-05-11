@@ -3,7 +3,6 @@ from events_mod.models.seq2seq import Seq2Seq
 import torch
 from typing import List
 import textwrap
-import logging
 
 
 class BulletPointSeq2Seq(Seq2Seq):
@@ -19,20 +18,11 @@ class BulletPointSeq2Seq(Seq2Seq):
     ):
         """Initialize the seq2seq module and set split strategy."""
         super().__init__(experiment_name, model_name)
-        self.split_strategy = split_strategy
-
-    def split_text(self, text: str) -> List[str]:
-        """The function that splits the article into paragrapahs."""
-        if self.split_strategy == "empty_line":
-            return text.split("\n\n")
-        elif self.split_strategy == "equally":
-            return textwrap.wrap(text, len(text) // (self.splits_number - 1))
-        else:
-            logging.error(f"Unknown split strategy: {self.split_strategy}")
+        self.split_handler: SplitHandler = SplitHandler(split_strategy)
 
     def tokenize(self, text: str) -> List[torch.Tensor]:
         """Tokenize text."""
-        data = self.split_text(text)
+        data = self.split_handler.split_text(text)
         return [
             self.tokenizer.encode(
                 "summarize: " + subtext,
@@ -70,3 +60,58 @@ class BulletPointSeq2Seq(Seq2Seq):
             for ids in generated_ids
         ]
         return "\n".join([f" - {text[0]}" for text in preds])
+
+
+class SplitHandler:
+    """Text split handler for BPSeq2Seq model."""
+
+    def __init__(self, strategy: str):
+        """Set the split strategy for handler."""
+        self.strategy = strategy
+
+    def split_text(self, text: str, **kwargs) -> List[str]:
+        """General function for article splitting, based on the strategy."""
+        return {
+            "empty_line": self.empty_line_split,
+            "equally": self.equal_split,
+            "sentence_split": self.sentence_split,
+        }[self.strategy](text, **kwargs)
+
+    def empty_line_split(self, text: str, min_length: int = 100) -> List[str]:
+        """Split the article by paragraphs marks. Merge if too short."""
+        splits: List[str] = text.replace("<p>", "\n\n").split("\n\n")
+        processed_splits: List[str] = [splits[0]]
+        for split in splits[1:]:
+            if len(split) < min_length:
+                processed_splits[-1] += split
+            else:
+                processed_splits.append(split)
+        return processed_splits
+
+    def equal_split(self, text: str, splits_count: int = 3) -> List[str]:
+        """Split the article in equal chunks."""
+        splits: List[str] = textwrap.wrap(text, len(text) // splits_count)
+        return splits[:-2] + ["".join(splits[-2:])]
+
+    def sentence_split(
+        self,
+        text: str,
+        splits_count: int = 3,
+        min_length: int = 100
+    ) -> List[str]:
+        """Split the article in chunks by sentencess."""
+        splits: List[str] = text.split(".")
+
+        processed_splits: List[str] = [splits[0]]
+        for split in splits[1:]:
+            if len(split) < min_length:
+                processed_splits[-1] += split
+            else:
+                processed_splits.append(split)
+
+        chunk_size: int = len(processed_splits) // splits_count
+        merged_paragraphs: List[str] = [
+            "".join(processed_splits[i:i + chunk_size])
+            for i in range(0, len(processed_splits), chunk_size)
+        ]
+        return merged_paragraphs
