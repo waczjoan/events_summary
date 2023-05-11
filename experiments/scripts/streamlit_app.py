@@ -53,10 +53,10 @@ def calc_rouge_metrics(
             )
             score_avg.append(precision)
 
-    st.write(f'Rouge.precision.avg: {sum(score_avg)/len(score_avg)}')
+    st.write(f'Rouge.precision.avg: {sum(score_avg) / len(score_avg)}')
     annotated_text(body)
 
-    return sum(score_avg)/len(score_avg)
+    return sum(score_avg) / len(score_avg)
 
 
 def create_bullet_points(model_bullet_point_summary, text):
@@ -84,6 +84,7 @@ def create_summary(model, text):
 
 
 def checkbox_and_summary(checkbox_name, model, text):
+    """Create checkbox and text summary."""
     checkbox_summary = st.checkbox(checkbox_name)
     summary = [""]
     if checkbox_summary:
@@ -102,6 +103,7 @@ def text_bullet_points(
     name_checkopoint,
     session_summary,
 ):
+    """Use model to create text bullet points summary."""
     text1 = st.text_area(
         text_area_text, text, placeholder=text_area_placeholder,
     )
@@ -128,6 +130,7 @@ def load_model(model_type, hparams):
 
 @st.cache_resource
 def load_event_registry(config_path="config/config.local"):
+    """To use Appi, config.local should have apikey."""
     config = configparser.RawConfigParser()
     config.read(config_path)
 
@@ -137,8 +140,9 @@ def load_event_registry(config_path="config/config.local"):
 
 
 def take_text(arts, idx):
+    """Take articles body to display text."""
     if len(arts) >= idx:
-        text = arts[idx-1]['body']
+        text = arts[idx - 1]['body']
     else:
         text = ''
     return text
@@ -291,10 +295,10 @@ def main(
             )
 
         st.write(text_concat)
-    s1=0
-    s2=0
-    s3=0
-    s4=0
+    s1 = 0
+    s2 = 0
+    s3 = 0
+    s4 = 0
     col1, col2, col3 = st.columns(3)
 
     with col1:
