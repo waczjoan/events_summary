@@ -3,15 +3,23 @@
 Run: streamlit run streamlit_app.py.
 """
 from pathlib import Path
+import re
+
 
 from annotated_text import annotated_text
 import click
+import configparser
+from eventregistry import EventRegistry
 import streamlit as st
-from events_mod.utils import truncate_texts
 import yaml
 
 from events_mod.evaluate.metrics import calc_rouge
-from events_mod.utils import load_model_from_config
+from events_mod.utils import (
+    load_model_from_config, truncate_texts
+)
+from events_mod.dataloader.eventregistry import (
+    detailed_about_event,
+)
 
 
 def rgb_to_hex(r, g, b):
@@ -27,19 +35,28 @@ def calc_rouge_metrics(
     """Calculate rouge metrics and create annotated text."""
     body = []
     sentences = text.split(".")
+    score_avg = []
     for sentence in sentences:
-        score = calc_rouge(
-            summary_text, sentence, metrics=[metric],
-        )
-        precision = round(score[metric].precision, 2)
-        color = rgb_to_hex(
-            round(255 * (1 - precision)),
-            255,
-            round(255 * (1 - precision)),
-        )
-        body.append((sentence, f'{metric}.precision={precision}', color))
+        if len(sentence) > 5:
+            score = calc_rouge(
+                summary_text, sentence, metrics=[metric],
+            )
+            precision = round(score[metric].precision, 2)
+            color = rgb_to_hex(
+                round(255 * (1 - precision)),
+                255,
+                round(255 * (1 - precision)),
+            )
+            body.append(
+                (re.sub('[^a-zA-Z ., \n]+', '', sentence),
+                 f'{metric}.precision={precision}', color)
+            )
+            score_avg.append(precision)
 
+    st.write(f'Rouge.precision.avg: {sum(score_avg)/len(score_avg)}')
     annotated_text(body)
+
+    return sum(score_avg)/len(score_avg)
 
 
 def create_bullet_points(model_bullet_point_summary, text):
@@ -66,6 +83,40 @@ def create_summary(model, text):
     return decoded_output
 
 
+def checkbox_and_summary(checkbox_name, model, text):
+    checkbox_summary = st.checkbox(checkbox_name)
+    summary = [""]
+    if checkbox_summary:
+        summary = create_summary(
+            model, text
+        )
+        st.write(summary)
+    return summary[0]
+
+
+def text_bullet_points(
+    text,
+    model_bullet_point_summary,
+    text_area_text,
+    text_area_placeholder,
+    name_checkopoint,
+    session_summary,
+):
+    text1 = st.text_area(
+        text_area_text, text, placeholder=text_area_placeholder,
+    )
+    st.write('text len:', len(text1))
+    if st.checkbox(name_checkopoint):
+        if session_summary is False:
+            if len(text1) > 10:
+                out = create_bullet_points(model_bullet_point_summary, text1)
+                st.write(out.split('\n - '))
+                session_summary = True
+    else:
+        session_summary = False
+    return text1, session_summary
+
+
 @st.cache_resource
 def load_model(model_type, hparams):
     """Load model and cache."""
@@ -73,6 +124,24 @@ def load_model(model_type, hparams):
         cfg=hparams[model_type]["model"]
     )
     return model
+
+
+@st.cache_resource
+def load_event_registry(config_path="config/config.local"):
+    config = configparser.RawConfigParser()
+    config.read(config_path)
+
+    details_dict = dict(config.items('eventRegistry'))
+    er = EventRegistry(apiKey=details_dict['apikey'])
+    return er
+
+
+def take_text(arts, idx):
+    if len(arts) >= idx:
+        text = arts[idx-1]['body']
+    else:
+        text = ''
+    return text
 
 
 @click.command()
@@ -99,46 +168,134 @@ def main(
 
     model_key_phrase_summary = load_model('key_phrase_summary', hparams)
 
+    er = load_event_registry()
+
+    st.header('API')
+
+    concat_text_option = "original selected texts"
+    summary_model_input_type_options = [
+        concat_text_option, "summary from selected texts"
+    ]
+
+    # settings
+    st.session_state.disabled = False
+    st.summary_model_input_type = summary_model_input_type_options[0]
+
+    st.session_state.calc_summary_1 = False
+    st.session_state.calc_summary_2 = False
+    st.session_state.calc_summary_3 = False
+    st.session_state.calc_summary_4 = False
+
+    text_input = st.text_input(
+        "Enter eventUri 👇",
+        disabled=st.session_state.disabled,
+        placeholder="eng-8608850",
+    )
+
+    checkbox_find_detailed = st.checkbox(
+        "Find detailed information about a specific event:"
+    )
+    if checkbox_find_detailed:
+        arts = detailed_about_event(
+            eventregistry=er,
+            event_id=text_input,
+            max_items=4,
+            lang='eng'
+        )
+        st.session_state.cached = True
+    else:
+        arts = []
+        st.session_state.cached = False
+
+    text1 = take_text(arts, 1)
+    text2 = take_text(arts, 2)
+    text3 = take_text(arts, 3)
+    text4 = take_text(arts, 4)
+
     st.header('Texts')
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        text1 = st.text_area('First text', '... input 1st text')
-        st.write('1st text len:', len(text1))
-        if st.checkbox("Summary 1:"):
-            out = create_bullet_points(model_bullet_point_summary, text1)
-            st.write(out.split('\n - '))
+
+        text1, st.session_state.calc_summary_1 = text_bullet_points(
+            text=text1,
+            model_bullet_point_summary=model_bullet_point_summary,
+            text_area_text='1st text',
+            text_area_placeholder="1st text",
+            name_checkopoint="Summary bullet points 1:",
+            session_summary=st.session_state.calc_summary_1
+        )
+
+        summary1 = checkbox_and_summary(
+            "Summary 1st text:", model, text1
+        )
 
     with col2:
-        text2 = st.text_area('2nd text', '... input 2nd text')
-        st.write('2nd text len:', len(text2))
-        if st.checkbox("Summary 2:"):
-            out = create_bullet_points(model_bullet_point_summary, text2)
-            st.write(out.split('\n - '))
+
+        text2, st.session_state.calc_summary_2 = text_bullet_points(
+            text=text2,
+            model_bullet_point_summary=model_bullet_point_summary,
+            text_area_text='2nd text',
+            text_area_placeholder="2nd text",
+            name_checkopoint="Summary bullet points 2:",
+            session_summary=st.session_state.calc_summary_2
+
+        )
+
+        summary2 = checkbox_and_summary("Summary 2nd text:", model, text2)
 
     with col3:
-        text3 = st.text_area('3rd text', '... input 3rd text')
-        st.write('3rd text len:', len(text3))
-        if st.checkbox("Summary 3:"):
-            out = create_bullet_points(model_bullet_point_summary, text3)
-            st.write(out.split('\n - '))
+        text3, st.session_state.calc_summary_3 = text_bullet_points(
+            text=text3,
+            model_bullet_point_summary=model_bullet_point_summary,
+            text_area_text='3rd text',
+            text_area_placeholder="3rd text",
+            name_checkopoint="Summary bullet points 3:",
+            session_summary=st.session_state.calc_summary_3
+
+        )
+
+        summary3 = checkbox_and_summary("Summary 3rd text:", model, text3)
 
     with col4:
-        text4 = st.text_area('4th text', '... input 4th text')
-        st.write('4th text len:', len(text4))
-        if st.checkbox("Summary 4:"):
-            out = create_bullet_points(model_bullet_point_summary, text4)
-            st.write(out.split('\n - '))
+        text4, st.session_state.calc_summary_4 = text_bullet_points(
+            text=text4,
+            model_bullet_point_summary=model_bullet_point_summary,
+            text_area_text='4th text',
+            text_area_placeholder="4th text",
+            name_checkopoint="Summary bullet points 4:",
+            session_summary=st.session_state.calc_summary_4
+        )
+
+        summary4 = checkbox_and_summary("Summary 4th text:", model, text4)
 
     st.header('All texts summarization')
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        st.radio(
+            "What should be concatenated 👉",
+            key="summary_model_input_type",
+            options=summary_model_input_type_options,
+        )
+    with col2:
 
-    text_concat = truncate_texts(
-        texts_batch=[text1, text2, text3, text4]
-    )
-    st.write(text_concat)
+        if st.session_state.summary_model_input_type == concat_text_option:
+            text_concat = truncate_texts(
+                texts_batch=[text1, text2, text3, text4]
+            )
+        else:
+            text_concat = truncate_texts(
+                texts_batch=[summary1, summary2, summary3, summary4]
+            )
+
+        st.write(text_concat)
+    s1=0
+    s2=0
+    s3=0
+    s4=0
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         checkbox1 = st.checkbox("Summary:")
@@ -149,6 +306,9 @@ def main(
             decoded_output1 = str(decoded_output)
 
             st.write(decoded_output1)
+            st.session_state.cached = True
+        else:
+            st.session_state.cached = False
 
     with col2:
         if st.checkbox("Model one line summary:"):
@@ -170,28 +330,30 @@ def main(
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            calc_rouge_metrics(
+            s1 = calc_rouge_metrics(
                 decoded_output1,
                 text1,
             )
 
         with col2:
-            calc_rouge_metrics(
+            s2 = calc_rouge_metrics(
                 decoded_output1,
                 text2,
             )
 
         with col3:
-            calc_rouge_metrics(
+            s3 = calc_rouge_metrics(
                 decoded_output1,
                 text3,
             )
 
         with col4:
-            calc_rouge_metrics(
+            s4 = calc_rouge_metrics(
                 decoded_output1,
-                text3,
+                text4,
             )
+
+    st.write(f'sum: {s1+s2+s3+s4}')
 
 
 if __name__ == "__main__":

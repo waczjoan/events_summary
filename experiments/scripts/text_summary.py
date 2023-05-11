@@ -22,7 +22,7 @@ from events_mod.dataloader.summary import load_texts
     "--model",
     help="Name of selected base model",
     type=str,
-    default="bullet_point_summary"
+    default="summarizer_for_news"
 )
 @click.option(
     "--output_dir",
