@@ -25,7 +25,7 @@ bullet_point_summary_params: &bullet_point_summary_params
   kwargs:
     experiment_name: 'bullet_point_summary'
     model_name: 'snrspeaks/t5-one-line-summary'
-    split_strategy: empty_line
+    split_strategy: 'empty_line'
 
 one_line_summary:
   model:
