@@ -34,6 +34,13 @@ bullet_point_summary_params: &bullet_point_summary_params
     model_name: 'snrspeaks/t5-one-line-summary'
     split_strategy: 'empty_line'
 
+semantic_similarity_roberta_params: &semantic_similarity_roberta_params
+  module: "events_mod.models.SimSemRoberta"
+  kwargs:
+    experiment_name: 'semantic_similarity'
+    device: 'cuda'
+    model_name: 'semantic_similarity_roberta'
+
 one_line_summary:
   model:
       <<: *one_line_summary_params
@@ -61,5 +68,11 @@ bert_summarizer_for_news:
 bullet_point_summary:
   model:
     <<: *bullet_point_summary_params
+  data_text:
+    <<: *data_text_params
+
+semantic_similarity_roberta:
+  model:
+    <<: *semantic_similarity_roberta_params
   data_text:
     <<: *data_text_params
