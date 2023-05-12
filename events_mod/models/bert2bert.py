@@ -30,12 +30,16 @@ class Bert2Bert:
             return_tensors="pt"
         )
 
-    def generate(self, inputs_ids):
+    def generate(self, inputs_ids, num_return_sequences: int = 3):
         """Method taking tokenized inputs and returning tensor predictions."""
         input_ids = inputs_ids['input_ids'].to(self.device)
         attention_mask = inputs_ids.attention_mask.to(self.device)
         self.model.to(self.device)
-        return self.model.generate(input_ids, attention_mask=attention_mask)
+        return self.model.generate(
+            input_ids,
+            attention_mask=attention_mask,
+            num_return_sequences=num_return_sequences,
+        )
 
     def decode(self, outputs):
         """Method decoding tensor predictions into string output."""

@@ -164,7 +164,9 @@ def main(
     with open(hparams_path, "r") as fin:
         hparams = yaml.safe_load(fin)
 
-    model = load_model('summarizer_for_news', hparams)
+    model_summarizer_for_news = load_model('summarizer_for_news', hparams)
+
+    model_bertseq1seq = load_model('bert_summarizer_for_news', hparams)
 
     model_one_line_summary = load_model('one_line_summary', hparams)
 
@@ -179,6 +181,10 @@ def main(
     concat_text_option = "original selected texts"
     summary_model_input_type_options = [
         concat_text_option, "summary from selected texts"
+    ]
+
+    summary_model_types = [
+        "t5-summarizer-for-news", "bert2bert_cnn_daily_mail"
     ]
 
     # settings
@@ -231,10 +237,6 @@ def main(
             session_summary=st.session_state.calc_summary_1
         )
 
-        summary1 = checkbox_and_summary(
-            "Summary 1st text:", model, text1
-        )
-
     with col2:
 
         text2, st.session_state.calc_summary_2 = text_bullet_points(
@@ -247,8 +249,6 @@ def main(
 
         )
 
-        summary2 = checkbox_and_summary("Summary 2nd text:", model, text2)
-
     with col3:
         text3, st.session_state.calc_summary_3 = text_bullet_points(
             text=text3,
@@ -260,8 +260,6 @@ def main(
 
         )
 
-        summary3 = checkbox_and_summary("Summary 3rd text:", model, text3)
-
     with col4:
         text4, st.session_state.calc_summary_4 = text_bullet_points(
             text=text4,
@@ -272,6 +270,33 @@ def main(
             session_summary=st.session_state.calc_summary_4
         )
 
+    st.radio(
+        "Which model should be used to summarizing 👉",
+        key="summary_model_type",
+        options=summary_model_types,
+    )
+    if st.session_state.summary_model_type == summary_model_types[0]:
+        model = model_summarizer_for_news
+    elif st.session_state.summary_model_type == summary_model_types[1]:
+        model = model_bertseq1seq
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+
+        summary1 = checkbox_and_summary(
+            "Summary 1st text:", model, text1
+        )
+
+    with col2:
+
+        summary2 = checkbox_and_summary("Summary 2nd text:", model, text2)
+
+    with col3:
+
+        summary3 = checkbox_and_summary("Summary 3rd text:", model, text3)
+
+    with col4:
         summary4 = checkbox_and_summary("Summary 4th text:", model, text4)
 
     st.header('All texts summarization')
