@@ -9,6 +9,7 @@ rouge-score==0.1.2
 tox==4.4.6
 tqdm==4.65.0
 transformers==4.26.0
+sentence-transformers==2.2.2
 
 # Current repository code
 --editable .
@@ -24,3 +25,7 @@ pytorch_lightning==1.8.0
 torch==1.12.0+cu116
 
 torchmetrics==0.11.0
+setuptools~=60.2.0
+numpy~=1.24.3
+scikit-learn~=1.2.2
+PyYAML~=6.0
