@@ -14,7 +14,6 @@ $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-
 ### Demo
 A prototype has been created with the help of the `Streamlit` library, to run the application you need to run:
 ```commandline
@@ -80,11 +79,11 @@ $ python experiment\scripts\text_summary.py
 
 This methodology involves segmenting the articles into bullet points in order to condense their content. The pipeline can be broken down into two primary steps:
 
-1. Segmentation of the text into individual paragraphs
+1. Segmentation of the text into single paragraphs
 2. Summarization of each paragraph into a concise bullet point.
 
 Text segmentation into paragraphs can be achieved through either semantic or lexical means. Semantic splitting, while ideal for summarization, can be challenging to implement. With the use of the EventRegistry API, article division can be accomplished through the inclusion of an empty line character (`\n\n`) or HTML tags such as `\<p\>` when scrapping the data. More advanced machine learning techniques require further research and testing, particularly in terms of efficiency.
 
 Lexical splitting, on the other hand, is a more simplistic approach, which can be done with the division of the text into `n` equal chunks of words. A superior alternative would be to divide the text into sentences, although this method necessitates greater effort than separating the text by dots.
 
-Existing pretrained models, like `snrspeaks/t5-one-line-summary` or `anikethdev/t5-summarizer-for-news`, can be efficiently utilized for the summarization component. For multi-lingual applications, the `mT5` model, such as `ctu-aic/mt5-base-multilingual-summarization-multilarge-cs`, should be considered but will need to undergo testing.
+Existing pretrained models, such as `snrspeaks/t5-one-line-summary` or `anikethdev/t5-summarizer-for-news`, can be efficiently utilized for the summarization component. For multi-lingual applications, the `mT5` model, such as `ctu-aic/mt5-base-multilingual-summarization-multilarge-cs`, should be considered but will need to undergo testing.
