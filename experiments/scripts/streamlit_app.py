@@ -174,6 +174,8 @@ def main(
 
     model_key_phrase_summary = load_model('key_phrase_summary', hparams)
 
+    model_compare = load_model('semantic_similarity_roberta', hparams)
+
     er = load_event_registry()
 
     st.header('API')
@@ -324,6 +326,7 @@ def main(
     s2 = 0
     s3 = 0
     s4 = 0
+    decoded_output1 = ''
     col1, col2, col3 = st.columns(3)
 
     with col1:
@@ -358,25 +361,37 @@ def main(
     if checkbox1:
         col1, col2, col3, col4 = st.columns(4)
 
+        cosine = model_compare.compare_embeddings(
+            summary=decoded_output1,
+            texts=[text1, text2, text3, text4])
+
         with col1:
+            st.write(f'cosine_similarity: {cosine[0]}')
+
             s1 = calc_rouge_metrics(
                 decoded_output1,
                 text1,
             )
 
         with col2:
+            st.write(f'cosine_similarity: {cosine[1]}')
+
             s2 = calc_rouge_metrics(
                 decoded_output1,
                 text2,
             )
 
         with col3:
+            st.write(f'cosine_similarity: {cosine[2]}')
+
             s3 = calc_rouge_metrics(
                 decoded_output1,
                 text3,
             )
 
         with col4:
+            st.write(f'cosine_similarity: {cosine[3]}')
+
             s4 = calc_rouge_metrics(
                 decoded_output1,
                 text4,
