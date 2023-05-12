@@ -38,7 +38,7 @@ from events_mod.dataloader.eventregistry import (
     "--keywords",
     help="Key words using to search articles",
     type=str,
-    default="computer science"
+    default="Ljubljana"
 )
 @click.option(
     "--keywords_loc",
@@ -50,7 +50,7 @@ from events_mod.dataloader.eventregistry import (
     "--api_type",
     help="Type to api endpoint",
     type=str,
-    default="detailed_about_event"
+    default="recently_added"
 )
 @click.option(
     "--event_id",

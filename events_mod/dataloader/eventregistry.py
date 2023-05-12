@@ -33,11 +33,12 @@ def newest_data(
 def recently_added_data(
     topic: str,
     max_items: int,
-    eventregistry: EventRegistry
+    eventregistry: EventRegistry,
+    lang: str = 'eng'
 ):
     """Print a list of recently added articles mentioning the topic."""
     q = QueryArticlesIter(
-        conceptUri=eventregistry.getConceptUri(topic)
+        conceptUri=eventregistry.getConceptUri(topic), lang=lang,
     )
     arts = []
     for art in q.execQuery(
