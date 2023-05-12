@@ -397,7 +397,7 @@ def main(
                 text4,
             )
 
-    st.write(f'sum: {s1+s2+s3+s4}')
+    st.write(f'sum: {s1 + s2 + s3 + s4}')
 
 
 if __name__ == "__main__":
